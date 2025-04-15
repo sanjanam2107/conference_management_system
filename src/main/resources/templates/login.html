@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login</title>
+    <title>Conference Management System - Login</title>
 </head>
 <body>
     <div th:if="${param.error}">
-        Invalid username or password.
+        Invalid username and password.
     </div>
     <div th:if="${param.logout}">
         You have been logged out.
@@ -21,6 +21,5 @@
             <input type="submit" value="Sign In"/>
         </div>
     </form>
-    <a th:href="@{/register}">Register</a>
 </body>
 </html>

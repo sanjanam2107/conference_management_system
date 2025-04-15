@@ -25,6 +25,11 @@ public class AuthController {
         return "auth/login";
     }
 
+    @GetMapping("/dashboard")
+    public String dashboard() {
+        return "dashboard";
+    }
+
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("registrationDto", new RegistrationDto());
@@ -46,7 +51,7 @@ public class AuthController {
         }
 
         try {
-            userService.registerNewUser(registrationDto);
+            userService.registerUser(registrationDto, "USER");
             redirectAttributes.addFlashAttribute("success", "Registration successful! Please login.");
             return "redirect:/login";
         } catch (RuntimeException e) {
@@ -54,4 +59,4 @@ public class AuthController {
             return "auth/register";
         }
     }
-} 
+}
