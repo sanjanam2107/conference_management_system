@@ -23,27 +23,47 @@
             No sessions available. Create a new session to get started.
         </div>
 
-        <div class="row" th:unless="${sessions.empty}">
-            <div class="col-md-4 mb-4" th:each="session : ${sessions}">
-                <div class="card">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" th:unless="${sessions.empty}">
+            <div class="col" th:each="session : ${sessions}">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title" th:text="${session.title}">Session Title</h5>
-                        <p class="card-text" th:text="${session.description}">Session Description</p>
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title" th:text="${session.title}">Session Title</h5>
+                            <span class="badge bg-primary" th:text="${session.type}">Type</span>
+                        </div>
+                        <p class="card-text" th:text="${session.description}">Description</p>
                         <p class="card-text">
                             <small class="text-muted">
-                                Type: <span th:text="${session.type}">Session Type</span>
+                                Capacity: <span th:text="${session.capacity}">50</span> attendees
                             </small>
                         </p>
-                        <p class="card-text">
-                            <small class="text-muted">
-                                Capacity: <span th:text="${session.capacity}">0</span>
-                            </small>
-                        </p>
-                        <div class="btn-group">
-                            <a th:href="@{/sessions/{id}(id=${session.sessionId})}" class="btn btn-info">View</a>
-                            <a th:href="@{/sessions/{id}/edit(id=${session.sessionId})}" class="btn btn-warning">Edit</a>
+                        
+                        <!-- Additional fields based on session type -->
+                        <div th:if="${session.type == 'TALK'}" th:object="${session}">
+                            <p class="card-text"><small class="text-muted">Speaker: <span th:text="*{speaker}">Speaker Name</span></small></p>
+                            <p class="card-text"><small class="text-muted">Level: <span th:text="*{level}">Level</span></small></p>
+                            <p class="card-text"><small class="text-muted">Duration: <span th:text="*{duration}">45</span> minutes</small></p>
+                        </div>
+                        
+                        <div th:if="${session.type == 'WORKSHOP'}" th:object="${session}">
+                            <p class="card-text"><small class="text-muted">Instructor: <span th:text="*{instructor}">Instructor Name</span></small></p>
+                            <p class="card-text"><small class="text-muted">Prerequisites: <span th:text="*{prerequisites}">None</span></small></p>
+                            <p class="card-text"><small class="text-muted">Duration: <span th:text="*{duration}">180</span> minutes</small></p>
+                            <p class="card-text"><small class="text-muted">Materials: <span th:text="*{materials}">None</span></small></p>
+                        </div>
+
+                        <div th:if="${session.type == 'KEYNOTE'}" th:object="${session}">
+                            <p class="card-text"><small class="text-muted">Keynote Speaker: <span th:text="*{keynoteSpeaker}">Speaker Name</span></small></p>
+                            <p class="card-text"><small class="text-muted">Topic: <span th:text="*{topic}">Topic</span></small></p>
+                            <p class="card-text"><small class="text-muted">Duration: <span th:text="*{duration}">60</span> minutes</small></p>
+                            <p class="card-text"><small class="text-muted" th:if="*{isOpeningKeynote}">Opening Keynote</small></p>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/sessions/{id}/edit(id=${session.sessionId})}" class="btn btn-sm btn-outline-primary">Edit</a>
                             <a th:href="@{/sessions/{id}/delete(id=${session.sessionId})}" 
-                               class="btn btn-danger"
+                               class="btn btn-sm btn-outline-danger"
                                onclick="return confirm('Are you sure you want to delete this session?')">Delete</a>
                         </div>
                     </div>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: html}">
+<head>
+    <title th:text="${conference != null ? 'Edit Conference' : 'Create Conference'}">Conference Form</title>
+</head>
+<body>
+    <div id="pageTitle" th:text="${conference != null ? 'Edit Conference' : 'Create Conference'}">Conference Form</div>
+    
+    <div id="mainContent">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <form th:action="${conference != null ? '/conferences/' + conference.id + '/edit' : '/conferences/new'}"
+                              th:object="${conference}" method="post">
+                            
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Conference Name</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                       th:value="${conference != null ? conference.name : ''}" required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}"
+                                     th:errors="*{name}">Name Error</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="4"
+                                          th:text="${conference != null ? conference.description : ''}" required></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}"
+                                     th:errors="*{description}">Description Error</div>
+                            </div>
+                            
+                            <div class="mb-3" th:if="${conference != null}">
+                                <label for="state" class="form-label">State</label>
+                                <select class="form-select" id="state" name="state" required>
+                                    <option th:each="state : ${T(com.conference.model.enums.ConferenceState).values()}"
+                                            th:value="${state}"
+                                            th:text="${state}"
+                                            th:selected="${conference != null && conference.state == state}">
+                                        State
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('state')}"
+                                     th:errors="*{state}">State Error</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i>
+                                    <span th:text="${conference != null ? 'Update Conference' : 'Create Conference'}">
+                                        Submit
+                                    </span>
+                                </button>
+                                <a href="/conferences" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
