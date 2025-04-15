@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Review Paper</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">Conference Management System</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Review Paper</h2>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Paper Details</h5>
+                <p><strong>Title:</strong> Sample Paper Title</p>
+                <p><strong>Abstract:</strong> Paper abstract goes here...</p>
+                <a href="#" class="btn btn-primary">Download Paper</a>
+            </div>
+        </div>
+
+        <form th:action="@{/reviewer/reviews/submit}" method="post">
+            <div class="mb-3">
+                <label class="form-label">Technical Quality (1-5)</label>
+                <select class="form-select" name="technicalScore" required>
+                    <option value="">Select Score</option>
+                    <option value="1">1 - Poor</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="3">3 - Good</option>
+                    <option value="4">4 - Very Good</option>
+                    <option value="5">5 - Excellent</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Novelty (1-5)</label>
+                <select class="form-select" name="noveltyScore" required>
+                    <option value="">Select Score</option>
+                    <option value="1">1 - Poor</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="3">3 - Good</option>
+                    <option value="4">4 - Very Good</option>
+                    <option value="5">5 - Excellent</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Comments to Authors</label>
+                <textarea class="form-control" name="comments" rows="5" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Confidential Comments to PC Chair</label>
+                <textarea class="form-control" name="confidentialComments" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+            <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+        </form>
+    </div>
+</body>
+</html>

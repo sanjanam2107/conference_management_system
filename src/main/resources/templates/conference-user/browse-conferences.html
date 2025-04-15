@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Browse Conferences</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">Conference Management System</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Available Conferences</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">ICSE 2024</h5>
+                        <p class="card-text">International Conference on Software Engineering</p>
+                        <p><strong>Date:</strong> May 14-20, 2024</p>
+                        <p><strong>Status:</strong> <span class="badge bg-success">Open for Submissions</span></p>
+                        <a href="#" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <!-- More conference cards would be dynamically added here -->
+        </div>
+        <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</body>
+</html>
