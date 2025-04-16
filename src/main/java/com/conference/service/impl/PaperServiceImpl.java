@@ -8,9 +8,11 @@ import com.conference.repository.UserRepository;
 import com.conference.service.PaperService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +41,10 @@ public class PaperServiceImpl implements PaperService {
         Author authorEntity = new Author();
         authorEntity.setUser(author);
         authorEntity.setPaper(savedPaper);
-        authorEntity.setCorrespondingAuthor(true);
+        
+        if (savedPaper.getAuthors() == null) {
+            savedPaper.setAuthors(new HashSet<>());
+        }
         savedPaper.getAuthors().add(authorEntity);
         
         return paperRepository.save(savedPaper);

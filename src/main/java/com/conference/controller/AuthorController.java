@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.util.List;
 
@@ -25,28 +26,39 @@ public class AuthorController {
         model.addAttribute("conferences", conferenceService.getAllConferences());
         return "author/create-paper";
     }
-    
+
     @PostMapping("/papers/create")
     public String submitPaper(@RequestParam("title") String title,
                             @RequestParam("description") String description,
                             @RequestParam("conferenceId") Long conferenceId,
                             @RequestParam("paperFile") MultipartFile file,
-                            Authentication authentication) throws IOException {
-        Paper paper = new Paper();
-        paper.setTitle(title);
-        paper.setDescription(description);
-        paper.setFileName(file.getOriginalFilename());
-        paper.setContentType(file.getContentType());
-        paper.setData(file.getBytes());
-        
-        paperService.submitPaper(paper, authentication.getName(), conferenceId);
-        return "redirect:/author/papers/status";
+                            Authentication authentication,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            if (file.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Please select a file to upload");
+                return "redirect:/author/papers/create";
+            }
+            
+            Paper paper = new Paper();
+            paper.setTitle(title);
+            paper.setDescription(description);
+            paper.setFileName(file.getOriginalFilename());
+            paper.setContentType(file.getContentType());
+            paper.setData(file.getBytes());
+            
+            paperService.submitPaper(paper, authentication.getName(), conferenceId);
+            redirectAttributes.addFlashAttribute("success", "Paper submitted successfully!");
+            return "redirect:/author/papers/status";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error submitting paper: " + e.getMessage());
+            return "redirect:/author/papers/create";
+        }
     }
 
     @GetMapping("/papers/status")
-    public String viewPaperStatus(Model model, Authentication authentication) {
-        List<Paper> papers = paperService.getPapersByAuthor(authentication.getName());
-        model.addAttribute("papers", papers);
+    public String paperStatus(Authentication authentication, Model model) {
+        model.addAttribute("papers", paperService.getPapersByAuthor(authentication.getName()));
         return "author/paper-status";
     }
 }
