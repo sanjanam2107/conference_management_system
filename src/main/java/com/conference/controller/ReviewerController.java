@@ -1,6 +1,7 @@
 package com.conference.controller;
 
 import com.conference.model.Paper;
+import com.conference.model.enums.PaperState;  // Add this import
 import com.conference.service.PaperService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,16 +26,22 @@ public class ReviewerController {
 
     @GetMapping("/papers")
     public String viewPapers(Model model) {
-        List<Paper> papers = paperService.getAllSubmittedPapers();
-        log.info("Found {} papers for review", papers.size());
-        
-        if (papers.isEmpty()) {
-            log.warn("No papers found for review");
-            model.addAttribute("error", "No papers are currently available for review");
+        try {
+            List<Paper> papers = paperService.getAllSubmittedPapers();  // Changed method name
+            log.info("Found {} papers for review", papers.size());
+            
+            model.addAttribute("papers", papers);
+            
+            if (papers.isEmpty()) {
+                model.addAttribute("info", "No papers are currently available for review");
+            }
+            
+            return "reviewer/papers";
+        } catch (Exception e) {
+            log.error("Error retrieving papers: ", e);
+            model.addAttribute("error", "Error retrieving papers. Please try again later.");
+            return "reviewer/papers";
         }
-        
-        model.addAttribute("papers", papers);
-        return "reviewer/papers";
     }
     
     @GetMapping("/papers/{id}/review")

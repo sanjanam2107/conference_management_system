@@ -18,7 +18,6 @@ import java.util.HashSet;
 @Service
 @RequiredArgsConstructor
 public class PaperServiceImpl implements PaperService {
-    
     private final PaperRepository paperRepository;
     private final UserRepository userRepository;
     private final ConferenceRepository conferenceRepository;
@@ -64,19 +63,18 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public List<Paper> getAllSubmittedPapers() {
-        List<Paper> papers = paperRepository.findAll(); // Get all papers first
-        log.info("Found {} total papers", papers.size());
-        List<Paper> submittedPapers = paperRepository.findByState(PaperState.SUBMITTED);
-        log.info("Found {} papers in SUBMITTED state", submittedPapers.size());
-        return submittedPapers;
+        return paperRepository.findByState(PaperState.SUBMITTED);
     }
 
     @Override
     public List<Paper> getPapersByReviewer(String username) {
-        User reviewer = userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("Reviewer not found"));
-            
-        return paperRepository.findByReviews_Reviewer_Username(username);
+        // Changed to use the standard findByState method
+        return paperRepository.findByState(PaperState.SUBMITTED);
+    }
+
+    @Override
+    public List<Paper> getPapersAssignedToReviewer(String username) {
+        return paperRepository.findPapersAssignedToReviewer(username);
     }
 
     @Override

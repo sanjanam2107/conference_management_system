@@ -91,7 +91,7 @@
         <!-- Reviewer Dashboard -->
         <div sec:authorize="hasRole('REVIEWER')" class="row">
             <div class="col-12">
-                <h2>Reviewer Dashboard</h2>
+                <h2>Reviewer Dashboard - <span th:text="${#authentication.name}"></span></h2>
                 <div class="row mt-4">
                     <div class="col-md-6">
                         <div class="card">

@@ -19,21 +19,36 @@
                     <tr>
                         <th>Paper Title</th>
                         <th>Author</th>
+                        <th>Average Score</th>
                         <th>Current Reviewers</th>
                         <th>Assign Reviewer</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Sample Paper 1</td>
-                        <td>John Doe</td>
-                        <td>2 assigned</td>
+                    <tr th:each="paper : ${papers}">
+                        <td th:text="${paper.title}"></td>
+                        <td th:text="${paper.authors[0].user.username}"></td>
+                        <td th:text="${#aggregates.avg(paper.reviews.![score])}">4.5</td>
                         <td>
-                            <select class="form-select">
-                                <option>Select Reviewer</option>
-                                <option>Reviewer 1</option>
-                                <option>Reviewer 2</option>
-                            </select>
+                            <ul class="list-unstyled">
+                                <li th:each="review : ${paper.reviews}">
+                                    <span th:text="${review.reviewer.username}"></span>
+                                    (<span th:text="${review.score}">4</span>/10)
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            <form th:action="@{/pc-chair/assign-reviewer}" method="post">
+                                <input type="hidden" name="paperId" th:value="${paper.id}" />
+                                <select class="form-select" name="reviewerId">
+                                    <option value="">Select Reviewer</option>
+                                    <option th:each="reviewer : ${availableReviewers}"
+                                            th:value="${reviewer.id}"
+                                            th:text="${reviewer.username}">
+                                        </option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm mt-2">Assign</button>
+                            </form>
                         </td>
                     </tr>
                 </tbody>

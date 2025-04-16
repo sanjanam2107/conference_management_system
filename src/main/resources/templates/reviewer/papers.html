@@ -19,13 +19,9 @@
         
         <!-- Debug Info -->
         <div class="alert alert-info" th:if="${papers.empty}">
-            No papers found. This could mean:
-            <ul>
-                <li>No papers have been submitted yet</li>
-                <li>All submitted papers have already been reviewed</li>
-            </ul>
+            No papers are currently assigned to you for review. Please wait for the PC Chair to assign papers.
         </div>
-        
+
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -35,6 +31,7 @@
                         <th>Description</th>
                         <th>Submission Date</th>
                         <th>Status</th>
+                        <th>Current Reviews</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -46,7 +43,18 @@
                         <td th:text="${#dates.format(paper.submissionDate, 'yyyy-MM-dd HH:mm')}"></td>
                         <td th:text="${paper.state}"></td>
                         <td>
-                            <a th:href="@{/reviewer/papers/{id}/review(id=${paper.id})}" class="btn btn-primary btn-sm">Review</a>
+                            <span th:text="${paper.reviews.size()}">0</span> reviews submitted
+                            <span th:if="${paper.reviews.size() > 0}">
+                                (Avg: <span th:text="${#aggregates.avg(paper.reviews.![score])}">0</span>/10)
+                            </span>
+                        </td>
+                        <td>
+                            <div th:if="${!paper.reviews.?[reviewer.username == #authentication.name].size()}">
+                                <a th:href="@{/reviewer/papers/{id}/review(id=${paper.id})}" class="btn btn-primary btn-sm">Review</a>
+                            </div>
+                            <div th:if="${paper.reviews.?[reviewer.username == #authentication.name].size()}">
+                                <span class="badge bg-success">Reviewed</span>
+                            </div>
                             <a th:href="@{/reviewer/papers/{id}/download(id=${paper.id})}" class="btn btn-secondary btn-sm">Download</a>
                         </td>
                     </tr>
@@ -59,4 +67,4 @@
         </div>
     </div>
 </body>
-</html> 
+</html>
