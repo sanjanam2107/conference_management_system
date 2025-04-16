@@ -29,9 +29,6 @@ public class Paper {
     private Set<Author> authors = new HashSet<>();
     
     @OneToMany(mappedBy = "paper", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Reviewer> reviewers = new HashSet<>();
-    
-    @OneToMany(mappedBy = "paper", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Review> reviews = new HashSet<>();
     
     @Temporal(TemporalType.TIMESTAMP)

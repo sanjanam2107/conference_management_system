@@ -9,6 +9,5 @@ import java.util.List;
 @Repository
 public interface PaperRepository extends JpaRepository<Paper, Long> {
     List<Paper> findByAuthors_User_Username(String username);
-    List<Paper> findByReviewers_User_Username(String username);
-    List<Paper> findByStateAndReviewersEmpty(PaperState state);
+    List<Paper> findByState(PaperState state);
 }

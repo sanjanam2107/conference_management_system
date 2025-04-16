@@ -11,7 +11,6 @@
         </div>
     </nav>
 
-    <!-- Add this after the nav and before the table -->
     <div class="container mt-4">
         <div th:if="${success}" class="alert alert-success" role="alert">
             <span th:text="${success}"></span>
@@ -38,8 +37,8 @@
                         <td th:text="${paper.title}">My Research Paper</td>
                         <td th:text="${paper.conference?.name}">ICSE 2024</td>
                         <td th:text="${#dates.format(paper.submissionDate, 'yyyy-MM-dd')}">2024-01-15</td>
-                        <td><span class="badge" th:classappend="${'bg-' + paper.state.color}" th:text="${paper.state}">Under Review</span></td>
-                        <td th:text="${paper.reviews.size() + '/' + paper.reviewers.size() + ' Complete'}">2/3 Complete</td>
+                        <td th:text="${paper.state}">Under Review</td>
+                        <td th:text="${paper.reviews.size() + ' Reviews'}">2 Reviews</td>
                         <td>
                             <a th:href="@{/author/papers/{id}(id=${paper.id})}" class="btn btn-primary btn-sm">View Details</a>
                             <a th:href="@{/author/papers/{id}/download(id=${paper.id})}" class="btn btn-secondary btn-sm">Download</a>
@@ -48,6 +47,7 @@
                 </tbody>
             </table>
         </div>
+        <a href="/author/papers/create" class="btn btn-primary">Submit New Paper</a>
         <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 </body>

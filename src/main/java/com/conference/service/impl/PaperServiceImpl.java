@@ -7,13 +7,14 @@ import com.conference.repository.PaperRepository;
 import com.conference.repository.UserRepository;
 import com.conference.service.PaperService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.HashSet;
-import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaperServiceImpl implements PaperService {
@@ -36,18 +37,18 @@ public class PaperServiceImpl implements PaperService {
         paper.setSubmissionDate(new Date());
         paper.setVersion(1);
         
-        Paper savedPaper = paperRepository.save(paper);
-        
         Author authorEntity = new Author();
         authorEntity.setUser(author);
-        authorEntity.setPaper(savedPaper);
+        authorEntity.setPaper(paper);
         
-        if (savedPaper.getAuthors() == null) {
-            savedPaper.setAuthors(new HashSet<>());
+        if (paper.getAuthors() == null) {
+            paper.setAuthors(new HashSet<>());
         }
-        savedPaper.getAuthors().add(authorEntity);
+        paper.getAuthors().add(authorEntity);
         
-        return paperRepository.save(savedPaper);
+        Paper savedPaper = paperRepository.save(paper);
+        log.info("Paper submitted successfully: {}", savedPaper.getId());
+        return savedPaper;
     }
 
     @Override
@@ -62,30 +63,12 @@ public class PaperServiceImpl implements PaperService {
     }
 
     @Override
-    public List<Paper> getPapersByReviewer(String username) {
-        return paperRepository.findByReviewers_User_Username(username);
-    }
-
-    @Override
-    public List<Paper> getUnassignedPapers() {
-        return paperRepository.findByStateAndReviewersEmpty(PaperState.SUBMITTED);
-    }
-
-    @Override
-    @Transactional
-    public void assignReviewer(Long paperId, Long reviewerId) {
-        Paper paper = getPaperById(paperId);
-        User reviewer = userRepository.findById(reviewerId)
-            .orElseThrow(() -> new RuntimeException("Reviewer not found"));
-            
-        Reviewer reviewerEntity = new Reviewer();
-        reviewerEntity.setUser(reviewer);
-        reviewerEntity.setPaper(paper);
-        
-        paper.getReviewers().add(reviewerEntity);
-        paper.setState(PaperState.UNDER_REVIEW);
-        
-        paperRepository.save(paper);
+    public List<Paper> getAllSubmittedPapers() {
+        List<Paper> papers = paperRepository.findAll(); // Get all papers first
+        log.info("Found {} total papers", papers.size());
+        List<Paper> submittedPapers = paperRepository.findByState(PaperState.SUBMITTED);
+        log.info("Found {} papers in SUBMITTED state", submittedPapers.size());
+        return submittedPapers;
     }
 
     @Override
@@ -102,12 +85,13 @@ public class PaperServiceImpl implements PaperService {
         review.setScore(score);
         review.setSubmissionDate(new Date());
 
-        paper.getReviews().add(review);
-        
-        if (paper.getReviews().size() == paper.getReviewers().size()) {
-            paper.setState(PaperState.REVIEWED);
+        if (paper.getReviews() == null) {
+            paper.setReviews(new HashSet<>());
         }
+        paper.getReviews().add(review);
+        paper.setState(PaperState.UNDER_REVIEW);
         
         paperRepository.save(paper);
+        log.info("Review submitted for paper {}", paperId);
     }
 }
