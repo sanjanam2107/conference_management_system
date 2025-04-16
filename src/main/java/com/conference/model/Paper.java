@@ -4,6 +4,7 @@ import com.conference.model.enums.PaperState;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import java.util.Date;  // Add this import
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,4 +44,7 @@ public class Paper {
     
     @OneToMany(mappedBy = "paper", cascade = CascadeType.ALL)
     private Set<Reviewer> reviewers = new HashSet<>();
-} 
+    
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date submissionDate;
+}

@@ -15,16 +15,21 @@
         <h2>Submit New Paper</h2>
         <form th:action="@{/author/papers/create}" method="post" enctype="multipart/form-data">
             <div class="mb-3">
+                <label class="form-label">Conference</label>
+                <select class="form-control" name="conferenceId" required>
+                    <option value="">Select Conference</option>
+                    <option th:each="conf : ${conferences}" 
+                            th:value="${conf.id}" 
+                            th:text="${conf.name}">Conference Name</option>
+                </select>
+            </div>
+            <div class="mb-3">
                 <label class="form-label">Paper Title</label>
                 <input type="text" class="form-control" name="title" required>
             </div>
             <div class="mb-3">
-                <label class="form-label">Abstract</label>
-                <textarea class="form-control" name="abstract" rows="4" required></textarea>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Keywords</label>
-                <input type="text" class="form-control" name="keywords" placeholder="Separate keywords with commas">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" name="description" rows="4" required></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label">Upload Paper (PDF)</label>

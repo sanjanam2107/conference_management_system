@@ -26,15 +26,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>My Research Paper</td>
-                        <td>ICSE 2024</td>
-                        <td>2024-01-15</td>
-                        <td><span class="badge bg-warning">Under Review</span></td>
-                        <td>2/3 Complete</td>
+                    <tr th:each="paper : ${papers}">
+                        <td th:text="${paper.title}">My Research Paper</td>
+                        <td th:text="${paper.conference?.name}">ICSE 2024</td>
+                        <td th:text="${#dates.format(paper.submissionDate, 'yyyy-MM-dd')}">2024-01-15</td>
+                        <td><span class="badge" th:classappend="${'bg-' + paper.state.color}" th:text="${paper.state}">Under Review</span></td>
+                        <td th:text="${paper.reviews.size() + '/' + paper.reviewers.size() + ' Complete'}">2/3 Complete</td>
                         <td>
-                            <a href="#" class="btn btn-primary btn-sm">View Details</a>
-                            <a href="#" class="btn btn-secondary btn-sm">Download</a>
+                            <a th:href="@{/author/papers/{id}(id=${paper.id})}" class="btn btn-primary btn-sm">View Details</a>
+                            <a th:href="@{/author/papers/{id}/download(id=${paper.id})}" class="btn btn-secondary btn-sm">Download</a>
                         </td>
                     </tr>
                 </tbody>
