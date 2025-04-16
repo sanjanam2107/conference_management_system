@@ -72,6 +72,14 @@ public class PaperServiceImpl implements PaperService {
     }
 
     @Override
+    public List<Paper> getPapersByReviewer(String username) {
+        User reviewer = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("Reviewer not found"));
+            
+        return paperRepository.findByReviews_Reviewer_Username(username);
+    }
+
+    @Override
     @Transactional
     public void submitReview(Long paperId, String reviewerUsername, String comments, int score) {
         Paper paper = getPaperById(paperId);

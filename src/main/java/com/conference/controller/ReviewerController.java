@@ -71,4 +71,11 @@ public class ReviewerController {
         
         return new ResponseEntity<>(paper.getData(), headers, HttpStatus.OK);
     }
+
+    @GetMapping("/reviews")
+    public String viewMyReviews(Model model, Authentication authentication) {
+        List<Paper> reviewedPapers = paperService.getPapersByReviewer(authentication.getName());
+        model.addAttribute("papers", reviewedPapers);
+        return "reviewer/my-reviews";
+    }
 }

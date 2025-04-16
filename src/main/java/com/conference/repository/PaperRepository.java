@@ -10,4 +10,5 @@ import java.util.List;
 public interface PaperRepository extends JpaRepository<Paper, Long> {
     List<Paper> findByAuthors_User_Username(String username);
     List<Paper> findByState(PaperState state);
+    List<Paper> findByReviews_Reviewer_Username(String username);
 }

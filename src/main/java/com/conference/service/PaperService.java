@@ -9,4 +9,5 @@ public interface PaperService {
     List<Paper> getAllSubmittedPapers();
     Paper getPaperById(Long id);
     void submitReview(Long paperId, String reviewerUsername, String comments, int score);
+    List<Paper> getPapersByReviewer(String username);
 }
