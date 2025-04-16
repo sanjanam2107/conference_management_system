@@ -4,6 +4,10 @@ import com.conference.model.Paper;
 import com.conference.service.ConferenceService;
 import com.conference.service.PaperService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -60,5 +64,23 @@ public class AuthorController {
     public String paperStatus(Authentication authentication, Model model) {
         model.addAttribute("papers", paperService.getPapersByAuthor(authentication.getName()));
         return "author/paper-status";
+    }
+
+    @GetMapping("/papers/{id}/download")
+    public ResponseEntity<byte[]> downloadPaper(@PathVariable Long id) {
+        Paper paper = paperService.getPaperById(id);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(paper.getContentType()));
+        headers.setContentDispositionFormData("attachment", paper.getFileName());
+        
+        return new ResponseEntity<>(paper.getData(), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/papers/{id}")
+    public String viewPaperDetails(@PathVariable Long id, Model model) {
+        Paper paper = paperService.getPaperById(id);
+        model.addAttribute("paper", paper);
+        return "author/paper-details";
     }
 }
