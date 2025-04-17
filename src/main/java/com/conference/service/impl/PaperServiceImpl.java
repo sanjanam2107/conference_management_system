@@ -150,4 +150,10 @@ public class PaperServiceImpl implements PaperService {
         paperRepository.save(paper);
         log.info("Review submitted for paper {}. Average score: {}", paperId, averageScore);
     }
+
+    @Override
+    @Transactional
+    public Paper savePaper(Paper paper) {
+        return paperRepository.save(paper);
+    }
 }

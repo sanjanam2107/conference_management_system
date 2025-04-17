@@ -13,6 +13,10 @@
 
     <div class="container mt-4">
         <h2>Make Paper Decisions</h2>
+        
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
         <div class="table-responsive">
             <table class="table">
                 <thead>
@@ -21,26 +25,44 @@
                         <th>Author</th>
                         <th>Reviews Complete</th>
                         <th>Average Score</th>
-                        <th>Decision</th>
+                        <th>Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Sample Paper 1</td>
-                        <td>John Doe</td>
-                        <td>3/3</td>
-                        <td>4.5/5</td>
+                    <tr th:each="paper : ${papers}">
+                        <td th:text="${paper.title}"></td>
                         <td>
-                            <select class="form-select">
-                                <option>Select Decision</option>
-                                <option>Accept</option>
-                                <option>Reject</option>
-                                <option>Revise</option>
-                            </select>
+                            <span th:each="author : ${paper.authors}" 
+                                  th:text="${author.user.username}"></span>
                         </td>
                         <td>
-                            <button class="btn btn-primary btn-sm">Submit Decision</button>
+                            <span th:text="${paper.reviews.size()}"></span>/4
+                            <div th:if="${paper.reviews.size() < 4}" class="text-danger">
+                                Waiting for all reviews
+                            </div>
+                        </td>
+                        <td>
+                            <span th:if="${paper.reviews.size() > 0}" 
+                                  th:text="${#numbers.formatDecimal(paper.averageScore, 1, 1)}">
+                            </span>/10
+                        </td>
+                        <td th:text="${paper.state}"></td>
+                        <td>
+                            <div th:if="${paper.reviews.size() == 4 and paper.state == T(com.conference.model.enums.PaperState).UNDER_REVIEW}">
+                                <form th:action="@{/pc-chair/papers/{id}/decision(id=${paper.id})}" 
+                                      method="post" style="display: inline;">
+                                    <input type="hidden" name="decision" 
+                                           th:value="${paper.averageScore >= 7 ? 'ACCEPT' : 'REJECT'}"/>
+                                    <button type="submit" class="btn btn-sm"
+                                            th:classappend="${paper.averageScore >= 7 ? 'btn-success' : 'btn-danger'}"
+                                            th:text="${paper.averageScore >= 7 ? 'Accept' : 'Reject'}">
+                                    </button>
+                                </form>
+                            </div>
+                            <div th:if="${paper.reviews.size() < 4}" class="text-warning">
+                                Waiting for all reviews
+                            </div>
                         </td>
                     </tr>
                 </tbody>
