@@ -27,21 +27,20 @@ public class ReviewerController {
     public String viewPapers(Model model, Authentication authentication) {
         try {
             String username = authentication.getName();
-            log.info("Current reviewer accessing papers: {}", username);
+            log.info("Reviewer {} accessing papers", username);
             
-            // Get all submitted papers
+            // Get all papers that need review
             List<Paper> allPapers = paperService.getAllSubmittedPapers();
-            log.info("Total submitted papers found: {}", allPapers.size());
             
-            // Add debug information to help track the current reviewer
-            model.addAttribute("currentReviewer", username);
+            // Add reviewer-specific information
             model.addAttribute("papers", allPapers);
-            model.addAttribute("debug", "Viewing as reviewer: " + username);
+            model.addAttribute("currentReviewer", username);
+            
+            log.info("Found {} papers for reviewer {}", allPapers.size(), username);
             
             return "reviewer/papers";
         } catch (Exception e) {
-            log.error("Error in viewPapers for reviewer {}: {}", 
-                      authentication.getName(), e.getMessage());
+            log.error("Error in viewPapers for {}: {}", authentication.getName(), e.getMessage());
             model.addAttribute("error", "Error loading papers: " + e.getMessage());
             return "reviewer/papers";
         }

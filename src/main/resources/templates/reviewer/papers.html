@@ -6,56 +6,57 @@
 </head>
 <body>
     <div class="container mt-4">
-        <h2>Papers Available for Review</h2>
+        <h2>Papers Available for Review - Reviewer: <span th:text="${currentReviewer}"></span></h2>
         
-        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-        
-        <div class="alert alert-info" th:if="${papers.empty}">
-            No papers are currently available for review.
+        <div class="alert alert-info mb-4">
+            <strong>Note:</strong> You can see all submitted papers here. Papers you've already reviewed will be marked accordingly.
         </div>
 
-        <div class="table-responsive" th:if="${not papers.empty}">
-            <!-- Add this near the top of the container div -->
-            <div class="alert alert-info">
-                Logged in as reviewer: <strong th:text="${#authentication.name}"></strong>
-            </div>
-
-            <!-- Update the table to clearly show which reviewer is viewing -->
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Conference</th>
-                            <th>Submission Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="paper : ${papers}">
-                            <td th:text="${paper.title}">Paper Title</td>
-                            <td th:text="${paper.conference?.name}">Conference Name</td>
-                            <td th:text="${#dates.format(paper.submissionDate, 'yyyy-MM-dd')}">2024-01-01</td>
-                            <td th:text="${paper.state}">SUBMITTED</td>
-                            <td>
-                                <div th:with="hasReviewed=${paper.reviews != null and paper.reviews.?[reviewer.username == #authentication.name].size() > 0}">
-                                    <div th:if="${!hasReviewed}" class="mb-2">
-                                        <a th:href="@{/reviewer/papers/{id}/review(id=${paper.id})}" 
-                                           class="btn btn-primary btn-sm">Review</a>
-                                    </div>
-                                    <div th:if="${hasReviewed}" class="mb-2">
-                                        <span class="badge bg-success">Already Reviewed</span>
-                                    </div>
-                                    <a th:href="@{/reviewer/papers/{id}/download(id=${paper.id})}" 
-                                       class="btn btn-secondary btn-sm">Download</a>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Conference</th>
+                        <th>Submission Date</th>
+                        <th>Status</th>
+                        <th>Reviews</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="paper : ${papers}">
+                        <td th:text="${paper.title}"></td>
+                        <td th:text="${paper.conference?.name}"></td>
+                        <td th:text="${#dates.format(paper.submissionDate, 'yyyy-MM-dd')}"></td>
+                        <td>
+                            <span th:text="${paper.state}" 
+                                  th:class="${paper.state == 'UNDER_REVIEW' ? 'badge bg-warning' : 'badge bg-primary'}">
+                            </span>
+                        </td>
+                        <td>
+                            <span th:text="${paper.reviews.size()}">0</span> reviews
+                        </td>
+                        <td>
+                            <div th:with="hasReviewed=${paper.reviews != null and paper.reviews.?[reviewer.username == #authentication.name].size() > 0}">
+                                <div th:if="${!hasReviewed}" class="mb-2">
+                                    <a th:href="@{/reviewer/papers/{id}/review(id=${paper.id})}" 
+                                       class="btn btn-primary btn-sm">Review</a>
                                 </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                                <div th:if="${hasReviewed}" class="mb-2">
+                                    <span class="badge bg-success">Already Reviewed</span>
+                                </div>
+                                <a th:href="@{/reviewer/papers/{id}/download(id=${paper.id})}" 
+                                   class="btn btn-secondary btn-sm">Download</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-3">
+            <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
         </div>
     </div>
 </body>

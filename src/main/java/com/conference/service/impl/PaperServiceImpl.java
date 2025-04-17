@@ -14,6 +14,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.HashSet;
 
+// Add this import at the top
+import java.util.Collection;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -63,8 +66,9 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public List<Paper> getAllSubmittedPapers() {
-        List<Paper> papers = paperRepository.findByState(PaperState.SUBMITTED);
-        log.info("Found {} submitted papers", papers.size());
+        // Get papers in both SUBMITTED and UNDER_REVIEW states
+        List<Paper> papers = paperRepository.findByStateIn(List.of(PaperState.SUBMITTED, PaperState.UNDER_REVIEW));
+        log.info("Found {} papers in SUBMITTED or UNDER_REVIEW state", papers.size());
         return papers;
     }
 
