@@ -38,4 +38,15 @@ public class Paper {
     
     @Enumerated(EnumType.STRING)
     private PaperState state;
+    
+    private double averageScore;
+    
+    // Add getter and setter
+    public double getAverageScore() {
+        return averageScore;
+    }
+    
+    public void setAverageScore(double averageScore) {
+        this.averageScore = averageScore;
+    }
 }

@@ -63,18 +63,46 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public List<Paper> getAllSubmittedPapers() {
-        return paperRepository.findByState(PaperState.SUBMITTED);
+        List<Paper> papers = paperRepository.findByState(PaperState.SUBMITTED);
+        log.info("Found {} submitted papers", papers.size());
+        return papers;
     }
 
     @Override
     public List<Paper> getPapersByReviewer(String username) {
-        // Changed to use the standard findByState method
-        return paperRepository.findByState(PaperState.SUBMITTED);
+        return paperRepository.findByReviews_Reviewer_Username(username);
     }
 
     @Override
     public List<Paper> getPapersAssignedToReviewer(String username) {
-        return paperRepository.findPapersAssignedToReviewer(username);
+        try {
+            // Get all papers in SUBMITTED state
+            List<Paper> submittedPapers = paperRepository.findByState(PaperState.SUBMITTED);
+            log.info("Found {} papers in SUBMITTED state", submittedPapers.size());
+            
+            // Filter out papers that this reviewer has already reviewed
+            List<Paper> availablePapers = submittedPapers.stream()
+                .filter(paper -> {
+                    // If paper has no reviews, it's available
+                    if (paper.getReviews() == null || paper.getReviews().isEmpty()) {
+                        return true;
+                    }
+                    
+                    // Check if current reviewer hasn't reviewed this paper
+                    return paper.getReviews().stream()
+                        .noneMatch(review -> 
+                            review.getReviewer() != null && 
+                            review.getReviewer().getUsername().equals(username));
+                })
+                .toList();
+            
+            log.info("Found {} papers available for reviewer {}", availablePapers.size(), username);
+            return availablePapers;
+            
+        } catch (Exception e) {
+            log.error("Error getting papers for reviewer {}: {}", username, e.getMessage());
+            throw new RuntimeException("Failed to retrieve papers for review", e);
+        }
     }
 
     @Override
@@ -83,6 +111,13 @@ public class PaperServiceImpl implements PaperService {
         Paper paper = getPaperById(paperId);
         User reviewer = userRepository.findByUsername(reviewerUsername)
             .orElseThrow(() -> new RuntimeException("Reviewer not found"));
+
+        // Check if reviewer has already reviewed this paper
+        if (paper.getReviews() != null && 
+            paper.getReviews().stream()
+                .anyMatch(r -> r.getReviewer().getUsername().equals(reviewerUsername))) {
+            throw new RuntimeException("You have already reviewed this paper");
+        }
 
         Review review = new Review();
         review.setPaper(paper);
@@ -95,9 +130,20 @@ public class PaperServiceImpl implements PaperService {
             paper.setReviews(new HashSet<>());
         }
         paper.getReviews().add(review);
-        paper.setState(PaperState.UNDER_REVIEW);
+        
+        // Calculate average score
+        double averageScore = paper.getReviews().stream()
+            .mapToInt(Review::getScore)
+            .average()
+            .orElse(score);
+        paper.setAverageScore(averageScore);
+        
+        // Update paper state
+        if (paper.getState() == PaperState.SUBMITTED) {
+            paper.setState(PaperState.UNDER_REVIEW);
+        }
         
         paperRepository.save(paper);
-        log.info("Review submitted for paper {}", paperId);
+        log.info("Review submitted for paper {}. Average score: {}", paperId, averageScore);
     }
 }

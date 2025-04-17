@@ -21,68 +21,82 @@ import java.util.List;
 @RequestMapping("/reviewer")
 @RequiredArgsConstructor
 public class ReviewerController {
-    
     private final PaperService paperService;
 
     @GetMapping("/papers")
-    public String viewPapers(Model model) {
+    public String viewPapers(Model model, Authentication authentication) {
         try {
-            List<Paper> papers = paperService.getAllSubmittedPapers();  // Changed method name
-            log.info("Found {} papers for review", papers.size());
+            String username = authentication.getName();
+            log.info("Current reviewer accessing papers: {}", username);
             
-            model.addAttribute("papers", papers);
+            // Get all submitted papers
+            List<Paper> allPapers = paperService.getAllSubmittedPapers();
+            log.info("Total submitted papers found: {}", allPapers.size());
             
-            if (papers.isEmpty()) {
-                model.addAttribute("info", "No papers are currently available for review");
-            }
+            // Add debug information to help track the current reviewer
+            model.addAttribute("currentReviewer", username);
+            model.addAttribute("papers", allPapers);
+            model.addAttribute("debug", "Viewing as reviewer: " + username);
             
             return "reviewer/papers";
         } catch (Exception e) {
-            log.error("Error retrieving papers: ", e);
-            model.addAttribute("error", "Error retrieving papers. Please try again later.");
+            log.error("Error in viewPapers for reviewer {}: {}", 
+                      authentication.getName(), e.getMessage());
+            model.addAttribute("error", "Error loading papers: " + e.getMessage());
             return "reviewer/papers";
         }
-    }
-    
-    @GetMapping("/papers/{id}/review")
-    public String reviewPaper(@PathVariable Long id, Model model) {
-        Paper paper = paperService.getPaperById(id);
-        model.addAttribute("paper", paper);
-        return "reviewer/review-paper";
-    }
-    
-    @PostMapping("/papers/{id}/submit-review")
-    public String submitReview(@PathVariable Long id,
-                             @RequestParam String comments,
-                             @RequestParam int score,
-                             Authentication authentication,
-                             RedirectAttributes redirectAttributes) {
-        try {
-            paperService.submitReview(id, authentication.getName(), comments, score);
-            redirectAttributes.addFlashAttribute("success", "Review submitted successfully!");
-            return "redirect:/reviewer/papers";
-        } catch (Exception e) {
-            log.error("Error submitting review for paper {}: {}", id, e.getMessage());
-            redirectAttributes.addFlashAttribute("error", "Error submitting review: " + e.getMessage());
-            return "redirect:/reviewer/papers/" + id + "/review";
-        }
-    }
-    
-    @GetMapping("/papers/{id}/download")
-    public ResponseEntity<byte[]> downloadPaper(@PathVariable Long id) {
-        Paper paper = paperService.getPaperById(id);
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(paper.getContentType()));
-        headers.setContentDispositionFormData("attachment", paper.getFileName());
-        
-        return new ResponseEntity<>(paper.getData(), headers, HttpStatus.OK);
     }
 
-    @GetMapping("/reviews")
-    public String viewMyReviews(Model model, Authentication authentication) {
-        List<Paper> reviewedPapers = paperService.getPapersByReviewer(authentication.getName());
-        model.addAttribute("papers", reviewedPapers);
-        return "reviewer/my-reviews";
+    @GetMapping("/papers/{id}/review")
+    public String reviewPaper(@PathVariable Long id, Model model, Authentication authentication) {
+        try {
+            Paper paper = paperService.getPaperById(id);
+            
+            // Check if paper exists and is available for review
+            if (paper == null) {
+                throw new RuntimeException("Paper not found");
+            }
+            
+            // Check if the reviewer has already reviewed this paper
+            if (paper.getReviews() != null && 
+                paper.getReviews().stream()
+                    .anyMatch(r -> r.getReviewer().getUsername().equals(authentication.getName()))) {
+                throw new RuntimeException("You have already reviewed this paper");
+            }
+            
+            model.addAttribute("paper", paper);
+            return "reviewer/review-paper";
+        } catch (Exception e) {
+            log.error("Error accessing paper for review: {}", e.getMessage());
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/reviewer/papers";
+        }
+    }
+
+    @PostMapping("/papers/{id}/submit-review")
+    public String submitReview(
+            @PathVariable Long id,
+            @RequestParam String comments,
+            @RequestParam int score,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
+        try {
+            if (authentication == null) {
+                throw new RuntimeException("User not authenticated");
+            }
+            
+            String username = authentication.getName();
+            log.info("Submitting review for paper {} by reviewer {}", id, username);
+            
+            paperService.submitReview(id, username, comments, score);
+            
+            redirectAttributes.addFlashAttribute("success", "Review submitted successfully!");
+            return "redirect:/reviewer/papers";
+            
+        } catch (Exception e) {
+            log.error("Error submitting review: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to submit review: " + e.getMessage());
+            return "redirect:/reviewer/papers/" + id + "/review";
+        }
     }
 }
